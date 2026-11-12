@@ -31,8 +31,8 @@ def test_example_config_loads():
     path = Path(__file__).resolve().parents[1] / "config" / "clients.example.yaml"
     reg = ClientRegistry.from_yaml(path)
     assert len(reg.all()) == 2
-    assert reg.by_number("+16145550100").id == "buckeye-hvac"
-    assert reg.by_id("lakeside-plumbing").call_mode == "front_number"
+    assert reg.by_number("+16145550100").id == "example-hvac"
+    assert reg.by_id("example-plumbing").call_mode == "front_number"
 
 
 def test_duplicate_tracking_numbers_rejected():

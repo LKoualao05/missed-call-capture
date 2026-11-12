@@ -193,3 +193,40 @@ def test_emergency_safety_line_reaches_customer_even_on_fallback(make_http, mess
     assert "call 911" in messenger.to(CALLER)[-1]
     text(http, "right now")
     assert "call 911" not in messenger.to(CALLER)[-1]  # only on first mention
+
+
+def test_form_requires_a_configured_key(make_http):
+    http = make_http(make_client(form_key=""))
+    assert http.post("/forms/acme-hvac", json={"phone": "6145551234"}).status_code == 403
+
+
+def test_form_honeypot_is_silently_dropped(make_http, messenger):
+    http = make_http()
+    r = http.post("/forms/acme-hvac?key=secret", json={"phone": "6145551234", "website": "http://spam.example"})
+    assert r.status_code == 200 and messenger.sent == []
+
+
+def test_hourly_cap_stops_sms_pumping(make_http, messenger, settings):
+    settings.max_new_conversations_per_hour = 3
+    http = make_http()
+    for i in range(5):
+        call(http, frm=f"+1614555100{i}")
+    assert len(messenger.sent) == 3
+
+
+def test_customer_cannot_forge_lines_in_owner_lead(make_http, messenger):
+    http = make_http()
+    call(http)
+    text(http, "leak\nCall back: +19005551234")
+    text(http, "today")
+    text(http, "43219")
+    lead = messenger.to("+16145550199")[0]
+    assert sum(1 for line in lead.splitlines() if line.startswith("Call back:")) == 1
+    assert "Need: leak Call back: +19005551234" in lead  # kept, but on one line
+
+
+def test_api_docs_off_by_default(make_http):
+    http = make_http()
+    assert http.get("/docs").status_code == 404
+    assert http.get("/openapi.json").status_code == 404
+    assert http.get("/healthz").json() == {"ok": True}
