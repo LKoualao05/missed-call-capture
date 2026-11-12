@@ -1,0 +1,59 @@
+# One entry per client business. Copy to config/clients.yaml and fill in real values.
+# Phone numbers are E.164 (+1XXXXXXXXXX). The businesses below are fictional.
+
+clients:
+  - id: buckeye-hvac
+    business_name: Buckeye Comfort HVAC
+    trade: HVAC
+    owner_name: Mike
+    tracking_number: "+16145550100"     # Twilio number
+    owner_phone: "+16145550199"         # where leads are texted
+    timezone: America/New_York
+
+    # conditional_forward: the client keeps their existing number and sets
+    #   "forward when busy / no answer" on their carrier to the Twilio number.
+    #   Every call that reaches us is already a missed call.
+    # front_number: the Twilio number is the published number. We ring the owner
+    #   for ring_timeout_seconds and only text back if nobody picks up.
+    call_mode: conditional_forward
+    ring_timeout_seconds: 20
+
+    business_hours:
+      mon: ["07:30", "18:00"]
+      tue: ["07:30", "18:00"]
+      wed: ["07:30", "18:00"]
+      thu: ["07:30", "18:00"]
+      fri: ["07:30", "18:00"]
+      sat: ["08:00", "13:00"]
+
+    service_area_zips: ["43219", "43230", "43081", "43082", "43004", "43068"]
+    form_key: change-me-buckeye
+
+  - id: lakeside-plumbing
+    business_name: Lakeside Plumbing & Drain
+    trade: plumbing
+    owner_name: Dana
+    tracking_number: "+12165550100"
+    owner_phone: "+12165550188"
+    timezone: America/New_York
+    call_mode: front_number
+    ring_timeout_seconds: 18
+    business_hours:
+      mon: ["08:00", "17:00"]
+      tue: ["08:00", "17:00"]
+      wed: ["08:00", "17:00"]
+      thu: ["08:00", "17:00"]
+      fri: ["08:00", "17:00"]
+    # Questions can be tailored per trade. Keys need, urgency, location get the
+    # standard labels on the owner's lead text; any other key is title-cased.
+    questions:
+      - key: need
+        ask: "What's going on? (leak, clog, water heater, something else?)"
+        purpose: The plumbing problem in the customer's words.
+      - key: urgency
+        ask: "Is water actively leaking right now, or can it wait a day or two?"
+        purpose: Active leak or flooding means emergency; otherwise their preferred timing.
+      - key: location
+        ask: "What's the address or ZIP for the job?"
+        purpose: Job location.
+    form_key: change-me-lakeside
