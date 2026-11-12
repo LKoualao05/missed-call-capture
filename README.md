@@ -35,7 +35,7 @@ Customer calls ──▶ no answer ──▶ instant text to customer
                      Phone: (614) 555-1234
                      Need: AC blowing warm air, upstairs unit
                      When: Today if possible
-                     Where: 1200 Morse Rd 43219
+                     Where: 123 Main St 43219
                      Call back: +16145551234
 ```
 
@@ -44,7 +44,8 @@ Customer calls ──▶ no answer ──▶ instant text to customer
 - **Emergency escalation:** gas smell, carbon monoxide, flooding, or no heat in winter alerts the owner immediately instead of waiting for all three answers, and tells the customer to get safe.
 - **Partial leads:** if the customer stops replying, the owner still gets what was collected after 20 minutes.
 - **Service-area check:** leads with a ZIP outside the client's area are flagged.
-- **Compliance built in:** STOP/HELP handling, opt-out tracking, Twilio signature validation, A2P 10DLC registration in the onboarding steps.
+- **Compliance built in:** STOP/HELP handling, opt-out tracking, A2P 10DLC registration in the onboarding steps.
+- **Abuse-resistant:** Twilio signature validation, a required per-client form key plus honeypot, a per-client hourly cap on new text threads to block SMS pumping, and customer text flattened to one line before it reaches the owner. See [docs/security.md](docs/security.md).
 
 ## How it works
 
@@ -112,7 +113,7 @@ config/
 docs/              Architecture, onboarding playbook, discovery, runbook, decisions
 scripts/
   simulate.py      Play the customer in your terminal, no Twilio needed
-tests/             35 tests, no network
+tests/             40 tests, no network
 ```
 
 ## Run it locally
