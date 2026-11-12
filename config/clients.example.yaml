@@ -2,8 +2,8 @@
 # Phone numbers are E.164 (+1XXXXXXXXXX). The businesses below are fictional.
 
 clients:
-  - id: buckeye-hvac
-    business_name: Buckeye Comfort HVAC
+  - id: example-hvac
+    business_name: Example Heating & Air
     trade: HVAC
     owner_name: Mike
     tracking_number: "+16145550100"     # Twilio number
@@ -27,10 +27,10 @@ clients:
       sat: ["08:00", "13:00"]
 
     service_area_zips: ["43219", "43230", "43081", "43082", "43004", "43068"]
-    form_key: change-me-buckeye
+    form_key: replace-with-a-long-random-string
 
-  - id: lakeside-plumbing
-    business_name: Lakeside Plumbing & Drain
+  - id: example-plumbing
+    business_name: Example Plumbing Co.
     trade: plumbing
     owner_name: Dana
     tracking_number: "+12165550100"
@@ -56,4 +56,4 @@ clients:
       - key: location
         ask: "What's the address or ZIP for the job?"
         purpose: Job location.
-    form_key: change-me-lakeside
+    form_key: replace-with-a-long-random-string
