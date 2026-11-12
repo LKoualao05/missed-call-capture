@@ -112,6 +112,8 @@ Emergencies don't change state. They trigger an extra owner alert the first time
 | Customer stops replying | Lead never completes | Cron sends partial lead after `STALE_AFTER_MINUTES` |
 | Customer calls three times in a row | Three text threads | Dedupe window (30 min) |
 | Endless back-and-forth | AI keeps talking | `MAX_CALLER_TURNS` closes it and hands off to the owner |
-| Forged webhook | Spam texts on client's number | Twilio signature validation, form `key` |
+| Forged webhook | Spam texts on client's number | Twilio signature validation, required form `key`, honeypot field |
+| SMS pumping (spoofed calls or form spam to many numbers) | Twilio bill runs up | US-only numbers, dedupe window, `MAX_NEW_CONVERSATIONS_PER_HOUR` per client |
+| Customer types fake lines into a reply | Forged "Call back" number on the owner's lead | Answers flattened to one line and length-capped before formatting |
 | Customer texts STOP | Legal exposure if we keep texting | Opt-out stored, conversation closed, future text-backs skipped |
 | Service restarts mid-conversation | Lost state | State is in SQLite, not memory |

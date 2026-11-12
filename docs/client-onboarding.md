@@ -55,8 +55,10 @@ Set the ring time so the owner still has a fair chance to answer. Around 20 seco
 
 ```
 POST https://<host>/forms/<client_id>?key=<form_key>
-fields: name, phone, message
+fields: name, phone, message, website (hidden honeypot, leave empty)
 ```
+
+Add `website` as a hidden field on their form. Real people never fill it in, so any submission that does is dropped as a bot.
 
 Most site builders (Wix, Squarespace, WordPress form plugins) support a webhook on submit, or it can go through Zapier.
 
