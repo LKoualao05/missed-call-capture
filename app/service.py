@@ -32,6 +32,7 @@ class LeadService:
     dedupe_window_minutes: int = 30
     stale_after_minutes: int = 20
     max_caller_turns: int = 6
+    max_new_conversations_per_hour: int = 60
 
     # entry points -------------------------------------------------------
 
@@ -49,6 +50,10 @@ class LeadService:
             return None
         if self.store.recent_for(client.id, caller, self.dedupe_window_minutes):
             log.info("skip text-back: %s already contacted within window", caller[-4:])
+            return None
+        if self.store.count_since(client.id, 60) >= self.max_new_conversations_per_hour:
+            # Protects the client's Twilio bill from SMS pumping (spoofed calls or form spam).
+            log.warning("hourly text-back cap reached for %s, skipping %s", client.id, caller[-4:])
             return None
 
         conv = self.store.create(client.id, caller, source)

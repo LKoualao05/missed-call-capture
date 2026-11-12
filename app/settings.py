@@ -28,6 +28,10 @@ class Settings(BaseSettings):
     stale_after_minutes: int = 20
     max_caller_turns: int = 6
 
+    # Abuse limits
+    max_new_conversations_per_hour: int = 60  # per client; caps cost if someone spams the number or form
+    enable_docs: bool = False  # /docs and /openapi.json stay off in production
+
 
 @lru_cache
 def get_settings() -> Settings:

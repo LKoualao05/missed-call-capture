@@ -26,6 +26,14 @@ log = logging.getLogger(__name__)
 MAX_SMS_CHARS = 320
 SAFETY_LINE = "If anyone is in danger, get out of the house and call 911. We're alerting the owner now."
 ZIP_RE = re.compile(r"\b(\d{5})\b")
+MAX_ANSWER_CHARS = 200
+MAX_NAME_CHARS = 40
+
+
+def one_line(text: str | None, limit: int) -> str:
+    """Customer text goes into the owner's lead. Keep it to one line so a reply can't
+    forge extra lines like a fake 'Call back:' number."""
+    return " ".join((text or "").split())[:limit]
 
 
 @dataclass
@@ -68,7 +76,8 @@ def finalize(client: ClientConfig, conv: Conversation, result: TurnResult) -> Tu
     """Apply the rules the model is not trusted with."""
     merged = {**conv.answers, **{k: v for k, v in result.answers.items() if v and v.strip()}}
     known = {q.key for q in client.questions}
-    result.answers = {k: v.strip() for k, v in merged.items() if k in known}
+    result.answers = {k: one_line(v, MAX_ANSWER_CHARS) for k, v in merged.items() if k in known}
+    result.caller_name = one_line(result.caller_name, MAX_NAME_CHARS) or None
     result.complete = not missing_keys(client, result.answers)
     result.emergency = result.emergency or conv.emergency
     name = result.caller_name or conv.caller_name

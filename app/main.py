@@ -50,9 +50,11 @@ def create_app(
         dedupe_window_minutes=settings.dedupe_window_minutes,
         stale_after_minutes=settings.stale_after_minutes,
         max_caller_turns=settings.max_caller_turns,
+        max_new_conversations_per_hour=settings.max_new_conversations_per_hour,
     )
 
-    app = FastAPI(title="Missed Call Capture", version="1.0.0")
+    docs = {} if settings.enable_docs else {"docs_url": None, "redoc_url": None, "openapi_url": None}
+    app = FastAPI(title="Missed Call Capture", version="1.0.0", **docs)
     app.state.service = service
     app.state.registry = registry
 
@@ -88,7 +90,7 @@ def create_app(
 
     @app.get("/healthz")
     def healthz() -> dict:
-        return {"ok": True, "clients": len(registry.all())}
+        return {"ok": True}
 
     @app.post("/twilio/voice")
     def voice(tasks: BackgroundTasks, params: dict = Depends(twilio_params)) -> Response:
@@ -126,12 +128,18 @@ def create_app(
         client = registry.by_id(client_id)
         if client is None:
             raise HTTPException(status_code=404)
-        if client.form_key and not hmac.compare_digest(request.query_params.get("key", ""), client.form_key):
+        # A client without a form_key has no form hookup; never accept unauthenticated posts.
+        if not client.form_key or not hmac.compare_digest(request.query_params.get("key", ""), client.form_key):
             raise HTTPException(status_code=403)
         if request.headers.get("content-type", "").startswith("application/json"):
             data = await request.json()
         else:
             data = dict(await request.form())
+        if not isinstance(data, dict):
+            raise HTTPException(status_code=422)
+        if str(data.get("website", "")).strip():
+            # Honeypot: the hidden "website" field is left blank by people and filled by bots.
+            return {"ok": True}
         phone = _normalize_us(str(data.get("phone", "")))
         if not phone:
             raise HTTPException(status_code=422, detail="phone is required")
@@ -140,8 +148,8 @@ def create_app(
             client,
             phone,
             "web_form",
-            name=(str(data.get("name", "")).strip() or None),
-            message=(str(data.get("message", "")).strip() or None),
+            name=(" ".join(str(data.get("name", "")).split())[:40] or None),
+            message=(str(data.get("message", "")).strip()[:1000] or None),
         )
         return {"ok": True}
 

@@ -120,6 +120,13 @@ class Store:
         ).fetchone()
         return self._row(row)
 
+    def count_since(self, client_id: str, minutes: int) -> int:
+        cutoff = (utcnow() - timedelta(minutes=minutes)).isoformat()
+        row = self._db.execute(
+            "SELECT COUNT(*) FROM conversations WHERE client_id = ? AND created_at >= ?", (client_id, cutoff)
+        ).fetchone()
+        return row[0]
+
     def save(self, conv: Conversation) -> None:
         conv.updated_at = utcnow().isoformat()
         with self._lock:
